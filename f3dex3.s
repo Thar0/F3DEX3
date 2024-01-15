@@ -424,6 +424,7 @@ jumpTableEntry G_QUAD_handler
 jumpTableEntry G_TRISTRIP_handler
 jumpTableEntry G_TRIFAN_handler
 jumpTableEntry G_LIGHTTORDP_handler
+jumpTableEntry G_RSEGMENT_handler
 
 // The maximum number of generated vertices in a clip polygon. In reality, this
 // is equal to MAX_CLIP_POLY_VERTS, but for testing we can change them separately.
@@ -2072,8 +2073,13 @@ G_RDPHALF_2_handler:
     j       G_RDP_handler
      sdv    $v29[0], -8(rdpCmdBufPtr)
 
+G_RSEGMENT_handler:
+    // Translate incoming gsSPSegment() base addresses from segmented to physical to support recursive translation.
+    // Assumes Segment 0 is always set to a base address of 0x00000000, else populating the segment table directly
+    // with physical addresses will not work. 
+    jal     segmented_to_physical
 G_MOVEWORD_handler:
-    srl     $2, cmd_w0, 16                              // load the moveword command and word index into $2 (e.g. 0xDB06 for G_MW_SEGMENT)
+     srl    $2, cmd_w0, 16                              // load the moveword command and word index into $2 (e.g. 0xDB06 for G_MW_SEGMENT)
     lhu     $12, (movewordTable - (G_MOVEWORD << 8))($2) // subtract the moveword label and offset the word table by the word index (e.g. 0xDB06 becomes 0x0304)
 do_moveword:
     sll     $11, cmd_w0, 16          // Sign bit = upper bit of offset

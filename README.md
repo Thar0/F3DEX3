@@ -179,6 +179,13 @@ Both OoT and SM64:
     - The change needed in OoT is: in `src/code/z_lights.c`, in
       `Lights_BindPoint`, `Lights_BindDirectional`, and `Lights_NewAndDraw`, set
       `l.type` to 0 right before setting `l.col`.
+- Segment 0 is now reserved, ensure segment 0 is never set to anything but
+  0x00000000. In F3DEX2 and prior this was only a good idea, in F3DEX3 segmented
+  addresses are now translated recursively (that is, gsSPSegment(0x08, 0x07001000)
+  sets segment 8 to the base address of segment 7 with an additional offset of
+  0x1000) so for correct behavior when supplying a direct-mapped or physical
+  address such as 0x80101000, segment 0 must always be 0x00000000 so that this
+  address resolves to e.g. 0x101000 as expected in this example.
 
 SM64 only:
 
@@ -332,6 +339,11 @@ addition, all lighting-related commands--e.g. `gdSPDefLights*`, `SPNumLights`,
 them binary incompatible. The lighting data structures, e.g. `Light_t`,
 `PosLight_t`, `LookAt_t`, `Lightsn`, `Lights*`, `PosLights*`, etc., have also
 changed--generally only slightly, so most code is compatible with no changes.
+
+`SPSegment` has been given a different command id (`G_RSEGMENT` vs `G_MOVEWORD`)
+to facilitate recursive segmented address translation. The original binary
+encoding is still valid, but does not support recursive translation like the new
+encoding, however recompiling with the C GBI will always use the new encoding.
 
 
 ## What are the tradeoffs for all these new features?
