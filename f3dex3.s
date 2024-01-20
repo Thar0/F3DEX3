@@ -1474,6 +1474,10 @@ vtx_skip_fog:
     jr      $ra
      sh     $12,              (VTX_CLIP      )(outputVtxPos) // Store first vertex results
 
+G_MODIFYVTX_handler:
+    // byte 3 = vtx being modified; addr -> $12
+    li      $11, do_moveword            // Moveword adds cmd_w0 to $12 for final addr
+    lbu     cmd_w0, (inputBufferEnd - 0x07)(inputBufferPos)
 vtx_addrs_from_cmd:
     // Treat eight bytes of last command each as vertex indices << 1
     // inputBufferEnd is close enough to the end of DMEM to fit in signed offset
@@ -2505,13 +2509,6 @@ G_DMA_IO_handler:
     sra     dmemAddr, dmemAddr, 2
     j       dma_read_write  // Trigger a DMA read or write, depending on the G_DMA_IO flag (which will occupy the sign bit of dmemAddr)
      li     $ra, wait_for_dma_and_run_next_command  // Setup the return address for running the next DL command
-
-G_MODIFYVTX_handler:
-    j       vtx_addrs_from_cmd          // byte 3 = vtx being modified; addr -> $12
-     li     $11, modifyvtx_return_from_addrs
-modifyvtx_return_from_addrs:
-    j       do_moveword                 // Moveword adds cmd_w0 to $12 for final addr
-     lbu    cmd_w0, (inputBufferEnd - 0x07)(inputBufferPos)
 
 G_BRANCH_WZ_handler:
     j       vtx_addrs_from_cmd          // byte 3 = vtx being tested; addr -> $12

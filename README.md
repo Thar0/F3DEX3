@@ -296,8 +296,7 @@ and commands except:
   MVP matrix in F3DEX3.
 - `G_MV_POINT` has been removed. This was not used in any command; it would have
   likely been used for debugging to copy vertices from DMEM to examine them.
-  This does not affect `SPModifyVertex`, which is still supported, though this
-  is moved to Overlay 4 (see below) so it will be slower than in F3DEX2.
+  This does not affect `SPModifyVertex`, which is still supported.
 - `G_MW_PERSPNORM` has been removed; `SPPerspNormalize` is still supported but
   is encoded differently, no longer using this define.
 - `G_MVO_LOOKATX` and `G_MVO_LOOKATY` have been removed, and `SPLookAtX` and
@@ -365,7 +364,6 @@ This overlay contains handlers for:
   discussed below
 - The codepath for `SPMatrix` with `G_MTX_MUL` set
 - `SPBranchLessZ*`
-- `SPModifyVertex`
 - `SPDma_io`
 
 Whenever any of these features is needed, the RSP has to swap to Overlay 4. The
